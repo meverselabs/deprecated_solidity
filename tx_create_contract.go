@@ -17,18 +17,39 @@ import (
 	"git.fleta.io/fleta/solidity/vm"
 )
 
+var allowedKeyHash = map[uint64]common.PublicHash{}
+
+// RegisterAllowedKey TODO
+func RegisterAllowedKey(ChainCoord *common.Coordinate, KeyHash common.PublicHash) {
+	allowedKeyHash[ChainCoord.ID()] = KeyHash
+}
+
+// UnregisterAllowedKey TODO
+func UnregisterAllowedKey(ChainCoord *common.Coordinate) {
+	delete(allowedKeyHash, ChainCoord.ID())
+}
+
 func init() {
-	transactor.RegisterHandler("solidity.CallContract", func(t transaction.Type) transaction.Transaction {
-		return &CallContract{
+	transactor.RegisterHandler("solidity.CreateContract", func(t transaction.Type) transaction.Transaction {
+		return &CreateContract{
 			Base: transaction.Base{
 				ChainCoord_: &common.Coordinate{},
 				Type_:       t,
 			},
 		}
 	}, func(loader data.Loader, t transaction.Transaction, signers []common.PublicHash) error {
-		tx := t.(*CallContract)
+		tx := t.(*CreateContract)
 		if tx.Seq() <= loader.Seq(tx.From()) {
 			return ErrInvalidSequence
+		}
+
+		if len(signers) > 1 {
+			return ErrInvalidSignerCount
+		}
+		if pubhash, has := allowedKeyHash[loader.ChainCoord().ID()]; has {
+			if !signers[0].Equal(pubhash) {
+				return ErrNotAllowed
+			}
 		}
 
 		fromAcc, err := loader.Account(tx.From())
@@ -44,7 +65,7 @@ func init() {
 			return err
 		}
 		return nil
-	}, func(Context *data.Context, Fee *amount.Amount, t transaction.Transaction, coord *common.Coordinate) (ret interface{}, rerr error) {
+	}, func(ctx *data.Context, Fee *amount.Amount, t transaction.Transaction, coord *common.Coordinate) (ret interface{}, rerr error) {
 		defer func() {
 			if e := recover(); e != nil {
 				if err, is := e.(error); is {
@@ -55,21 +76,21 @@ func init() {
 			}
 		}()
 
-		tx := t.(*CallContract)
-		sn := Context.Snapshot()
-		defer Context.Revert(sn)
+		tx := t.(*CreateContract)
+		sn := ctx.Snapshot()
+		defer ctx.Revert(sn)
 
-		if tx.Seq() != Context.Seq(tx.From())+1 {
+		if tx.Seq() != ctx.Seq(tx.From())+1 {
 			return nil, ErrInvalidSequence
 		}
-		Context.AddSeq(tx.From())
+		ctx.AddSeq(tx.From())
 
-		fromAcc, err := Context.Account(tx.From())
+		fromAcc, err := ctx.Account(tx.From())
 		if err != nil {
 			return nil, err
 		}
 
-		chainCoord := Context.ChainCoord()
+		chainCoord := ctx.ChainCoord()
 		balance := fromAcc.Balance(chainCoord)
 		if balance.Less(Fee) {
 			return nil, ErrInsuffcientBalance
@@ -77,9 +98,15 @@ func init() {
 		balance = balance.Sub(Fee)
 		fromAcc.SetBalance(chainCoord, balance)
 
+		contAddr := common.NewAddress(coord, chainCoord, 0)
+		if is, err := ctx.IsExistAccount(contAddr); err != nil {
+			return nil, err
+		} else if is {
+			return nil, ErrExistAddress
+		}
 		statedb := &StateDB{
 			ChainCoord: chainCoord,
-			Context:    Context,
+			Context:    ctx,
 		}
 		logconfig := &vm.LogConfig{
 			DisableMemory: false,
@@ -90,7 +117,7 @@ func init() {
 			Tracer: vm.NewStructLogger(logconfig),
 			Debug:  false,
 		}
-		vContext := vm.Context{
+		vctx := vm.Context{
 			CanTransfer: CanTransfer,
 			Transfer:    Transfer,
 			GetHash:     func(uint64) hash.Hash256 { return hash.Hash256{} },
@@ -99,44 +126,42 @@ func init() {
 			Time:        big.NewInt(time.Now().Unix()),
 			Difficulty:  new(big.Int),
 		}
-		evm := vm.NewEVM(vContext, statedb, vmCfg)
-		ret, err = evm.Call(vm.AccountRef(tx.From()), tx.To, append(tx.Method, tx.Params...), amount.NewCoinAmount(0, 0))
+		evm := vm.NewEVM(vctx, statedb, vmCfg)
+		code, err := evm.Create(vm.AccountRef(tx.From()), contAddr, append(tx.Code, tx.Params...), amount.NewCoinAmount(0, 0))
 		if err != nil {
 			return nil, err
 		}
-		Context.Commit(sn)
-		return ret, nil
+		ctx.Commit(sn)
+		return code, nil
 	})
 }
 
-// CallContract TODO
-type CallContract struct {
+// CreateContract TODO
+type CreateContract struct {
 	transaction.Base
 	Seq_   uint64
 	From_  common.Address
-	To     common.Address
-	Amount *amount.Amount
-	Method []byte
+	Code   []byte
 	Params []byte
 }
 
 // IsUTXO TODO
-func (tx *CallContract) IsUTXO() bool {
+func (tx *CreateContract) IsUTXO() bool {
 	return false
 }
 
 // From TODO
-func (tx *CallContract) From() common.Address {
+func (tx *CreateContract) From() common.Address {
 	return tx.From_
 }
 
 // Seq TODO
-func (tx *CallContract) Seq() uint64 {
+func (tx *CreateContract) Seq() uint64 {
 	return tx.Seq_
 }
 
 // Hash TODO
-func (tx *CallContract) Hash() hash.Hash256 {
+func (tx *CreateContract) Hash() hash.Hash256 {
 	var buffer bytes.Buffer
 	if _, err := tx.WriteTo(&buffer); err != nil {
 		panic(err)
@@ -145,7 +170,7 @@ func (tx *CallContract) Hash() hash.Hash256 {
 }
 
 // WriteTo TODO
-func (tx *CallContract) WriteTo(w io.Writer) (int64, error) {
+func (tx *CreateContract) WriteTo(w io.Writer) (int64, error) {
 	var wrote int64
 	if n, err := tx.Base.WriteTo(w); err != nil {
 		return wrote, err
@@ -162,17 +187,7 @@ func (tx *CallContract) WriteTo(w io.Writer) (int64, error) {
 	} else {
 		wrote += n
 	}
-	if n, err := tx.To.WriteTo(w); err != nil {
-		return wrote, err
-	} else {
-		wrote += n
-	}
-	if n, err := tx.Amount.WriteTo(w); err != nil {
-		return wrote, err
-	} else {
-		wrote += n
-	}
-	if n, err := util.WriteBytes8(w, tx.Method); err != nil {
+	if n, err := util.WriteBytes(w, tx.Code); err != nil {
 		return wrote, err
 	} else {
 		wrote += n
@@ -186,7 +201,7 @@ func (tx *CallContract) WriteTo(w io.Writer) (int64, error) {
 }
 
 // ReadFrom TODO
-func (tx *CallContract) ReadFrom(r io.Reader) (int64, error) {
+func (tx *CreateContract) ReadFrom(r io.Reader) (int64, error) {
 	var read int64
 	if n, err := tx.Base.ReadFrom(r); err != nil {
 		return read, err
@@ -204,21 +219,11 @@ func (tx *CallContract) ReadFrom(r io.Reader) (int64, error) {
 	} else {
 		read += n
 	}
-	if n, err := tx.To.ReadFrom(r); err != nil {
+	if bs, n, err := util.ReadBytes(r); err != nil {
 		return read, err
 	} else {
 		read += n
-	}
-	if n, err := tx.Amount.ReadFrom(r); err != nil {
-		return read, err
-	} else {
-		read += n
-	}
-	if bs, n, err := util.ReadBytes8(r); err != nil {
-		return read, err
-	} else {
-		read += n
-		tx.Method = bs
+		tx.Code = bs
 	}
 	if bs, n, err := util.ReadBytes(r); err != nil {
 		return read, err
