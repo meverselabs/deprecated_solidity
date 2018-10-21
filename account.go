@@ -7,6 +7,7 @@ import (
 	"git.fleta.io/fleta/core/account"
 	"git.fleta.io/fleta/core/accounter"
 	"git.fleta.io/fleta/core/amount"
+	"git.fleta.io/fleta/core/data"
 )
 
 func init() {
@@ -17,7 +18,7 @@ func init() {
 				BalanceHash: map[uint64]*amount.Amount{},
 			},
 		}
-	}, func(a account.Account, signers []common.PublicHash) error {
+	}, func(loader data.Loader, a account.Account, signers []common.PublicHash) error {
 		return ErrNotAllowed
 	})
 }
