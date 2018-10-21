@@ -9,7 +9,6 @@ import (
 	"git.fleta.io/fleta/core/accounter"
 	"git.fleta.io/fleta/core/amount"
 	"git.fleta.io/fleta/core/data"
-	"git.fleta.io/fleta/core/db"
 	"git.fleta.io/fleta/solidity/vm"
 )
 
@@ -183,7 +182,7 @@ func (sd *StateDB) Exist(addr common.Address) bool {
 func (sd *StateDB) Empty(addr common.Address) bool {
 	//log.Println("Empty", addr)
 	if acc, err := sd.Context.Account(addr); err != nil {
-		if err != db.ErrNotExistKey {
+		if err != data.ErrNotExistAccount {
 			panic(err)
 		}
 		return true

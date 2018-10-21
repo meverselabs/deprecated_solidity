@@ -8,7 +8,6 @@ import (
 	"git.fleta.io/fleta/common/hash"
 	"git.fleta.io/fleta/core/amount"
 	"git.fleta.io/fleta/core/data"
-	"git.fleta.io/fleta/core/db"
 	"git.fleta.io/fleta/solidity/vm"
 )
 
@@ -119,7 +118,7 @@ func (sd *ViewDB) Exist(addr common.Address) bool {
 // Empty TODO
 func (sd *ViewDB) Empty(addr common.Address) bool {
 	if acc, err := sd.Loader.Account(addr); err != nil {
-		if err != db.ErrNotExistKey {
+		if err != data.ErrNotExistAccount {
 			panic(err)
 		}
 		return true
