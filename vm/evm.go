@@ -142,23 +142,18 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, valu
 	)
 	defer evm.StateDB.RevertToSnapshot(snapshot)
 	if !evm.StateDB.Exist(addr) {
-		precompiles := PrecompiledContractsByzantium
-		if precompiles[addr] == nil && value.Sign() == 0 {
-			// Calling a non existing account, don't do antything, but ping the tracer
-			if evm.vmConfig.Debug && evm.depth == 0 {
-				evm.vmConfig.Tracer.CaptureStart(caller.Address(), addr, false, input, value)
-				evm.vmConfig.Tracer.CaptureEnd(ret, 0, nil)
-			}
-			return nil, nil
-		}
 		return nil, ErrNotExistContract
 	}
 	evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value)
+	code := evm.StateDB.GetCode(addr)
+	if len(code) == 0 {
+		return nil, ErrInvalidContract
+	}
 
 	// Initialise a new contract and set the code that is to be used by the EVM.
 	// The contract is a scoped environment for this execution context only.
 	contract := NewContract(caller, to, value)
-	contract.SetCallCode(&addr, evm.StateDB.GetCodeHash(addr), evm.StateDB.GetCode(addr))
+	contract.SetCallCode(&addr, evm.StateDB.GetCodeHash(addr), code)
 
 	start := time.Now()
 

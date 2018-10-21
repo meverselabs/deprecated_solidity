@@ -85,7 +85,7 @@ func init() {
 		}
 		statedb := &StateDB{
 			ChainCoord: chainCoord,
-			Context:    data.NewContext(data.NewEmptyLoader(chainCoord)),
+			Context:    Context,
 		}
 		logconfig := &vm.LogConfig{
 			DisableMemory: false,

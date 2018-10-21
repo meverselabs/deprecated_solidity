@@ -25,4 +25,5 @@ var (
 	ErrContractAddressCollision = errors.New("contract address collision")
 	ErrExistContract            = errors.New("exist contract")
 	ErrNotExistContract         = errors.New("not exist contract")
+	ErrInvalidContract          = errors.New("invalid contract")
 )

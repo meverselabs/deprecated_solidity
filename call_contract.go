@@ -77,10 +77,9 @@ func init() {
 		balance = balance.Sub(Fee)
 		fromAcc.SetBalance(chainCoord, balance)
 
-		contAddr := common.NewAddress(coord, chainCoord, 0)
 		statedb := &StateDB{
 			ChainCoord: chainCoord,
-			Context:    data.NewContext(data.NewEmptyLoader(chainCoord)),
+			Context:    Context,
 		}
 		logconfig := &vm.LogConfig{
 			DisableMemory: false,
@@ -101,8 +100,8 @@ func init() {
 			Difficulty:  new(big.Int),
 		}
 		evm := vm.NewEVM(vContext, statedb, vmCfg)
-		ret, err = evm.Call(vm.AccountRef(tx.From()), contAddr, tx.Params, amount.NewCoinAmount(0, 0))
-		if _, err := evm.Create(vm.AccountRef(tx.From()), contAddr, tx.Method[:], amount.NewCoinAmount(0, 0)); err != nil {
+		ret, err = evm.Call(vm.AccountRef(tx.From()), tx.To, append(tx.Method, tx.Params...), amount.NewCoinAmount(0, 0))
+		if err != nil {
 			return nil, err
 		}
 		Context.Commit(sn)
@@ -117,7 +116,7 @@ type CallContract struct {
 	From_  common.Address
 	To     common.Address
 	Amount *amount.Amount
-	Method hash.Hash256
+	Method []byte
 	Params []byte
 }
 
@@ -173,7 +172,7 @@ func (tx *CallContract) WriteTo(w io.Writer) (int64, error) {
 	} else {
 		wrote += n
 	}
-	if n, err := tx.Method.WriteTo(w); err != nil {
+	if n, err := util.WriteBytes8(w, tx.Method); err != nil {
 		return wrote, err
 	} else {
 		wrote += n
@@ -215,10 +214,11 @@ func (tx *CallContract) ReadFrom(r io.Reader) (int64, error) {
 	} else {
 		read += n
 	}
-	if n, err := tx.Method.ReadFrom(r); err != nil {
+	if bs, n, err := util.ReadBytes8(r); err != nil {
 		return read, err
 	} else {
 		read += n
+		tx.Method = bs
 	}
 	if bs, n, err := util.ReadBytes(r); err != nil {
 		return read, err
