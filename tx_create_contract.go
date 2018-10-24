@@ -12,7 +12,6 @@ import (
 	"git.fleta.io/fleta/core/amount"
 	"git.fleta.io/fleta/core/data"
 	"git.fleta.io/fleta/core/transaction"
-	"git.fleta.io/fleta/core/transactor"
 	"git.fleta.io/fleta/solidity/vm"
 )
 
@@ -29,7 +28,7 @@ func UnregisterAllowedKey(ChainCoord *common.Coordinate) {
 }
 
 func init() {
-	transactor.RegisterHandler("solidity.CreateContract", func(t transaction.Type) transaction.Transaction {
+	data.RegisterTransaction("solidity.CreateContract", func(t transaction.Type) transaction.Transaction {
 		return &CreateContract{
 			Base: transaction.Base{
 				ChainCoord_: &common.Coordinate{},

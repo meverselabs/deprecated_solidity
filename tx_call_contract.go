@@ -12,12 +12,11 @@ import (
 	"git.fleta.io/fleta/core/amount"
 	"git.fleta.io/fleta/core/data"
 	"git.fleta.io/fleta/core/transaction"
-	"git.fleta.io/fleta/core/transactor"
 	"git.fleta.io/fleta/solidity/vm"
 )
 
 func init() {
-	transactor.RegisterHandler("solidity.CallContract", func(t transaction.Type) transaction.Transaction {
+	data.RegisterTransaction("solidity.CallContract", func(t transaction.Type) transaction.Transaction {
 		return &CallContract{
 			Base: transaction.Base{
 				ChainCoord_: &common.Coordinate{},
