@@ -6,7 +6,6 @@ import (
 
 	"git.fleta.io/fleta/common"
 	"git.fleta.io/fleta/common/hash"
-	"git.fleta.io/fleta/core/accounter"
 	"git.fleta.io/fleta/core/amount"
 	"git.fleta.io/fleta/core/data"
 	"git.fleta.io/fleta/solidity/vm"
@@ -36,11 +35,7 @@ type StateDB struct {
 // CreateAccount TODO
 func (sd *StateDB) CreateAccount(addr common.Address) {
 	//log.Println("CreateAccount", addr)
-	act, err := accounter.ByCoord(sd.ChainCoord)
-	if err != nil {
-		panic(err)
-	}
-	a, err := act.NewByTypeName("solidity.Account")
+	a, err := sd.Context.Accounter().NewByTypeName("solidity.Account")
 	if err != nil {
 		panic(err)
 	}

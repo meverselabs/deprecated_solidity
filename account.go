@@ -5,13 +5,12 @@ import (
 
 	"git.fleta.io/fleta/common"
 	"git.fleta.io/fleta/core/account"
-	"git.fleta.io/fleta/core/accounter"
 	"git.fleta.io/fleta/core/amount"
 	"git.fleta.io/fleta/core/data"
 )
 
 func init() {
-	accounter.RegisterHandler("solidity.Account", func(t account.Type) account.Account {
+	data.RegisterAccount("solidity.Account", func(t account.Type) account.Account {
 		return &Account{
 			Base: account.Base{
 				Type_:       t,
