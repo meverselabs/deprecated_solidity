@@ -166,7 +166,7 @@ func (tx *CallContract) WriteTo(w io.Writer) (int64, error) {
 	} else {
 		wrote += n
 	}
-	if n, err := util.WriteBytes8(w, tx.Method); err != nil {
+	if n, err := util.WriteBytes(w, tx.Method); err != nil {
 		return wrote, err
 	} else {
 		wrote += n
@@ -208,7 +208,7 @@ func (tx *CallContract) ReadFrom(r io.Reader) (int64, error) {
 	} else {
 		read += n
 	}
-	if bs, n, err := util.ReadBytes8(r); err != nil {
+	if bs, n, err := util.ReadBytes(r); err != nil {
 		return read, err
 	} else {
 		read += n
