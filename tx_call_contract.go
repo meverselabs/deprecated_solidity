@@ -103,7 +103,8 @@ func init() {
 	})
 }
 
-// CallContract TODO
+// CallContract is a solidity.CallContract
+// It is used to call the contract method
 type CallContract struct {
 	transaction.Base
 	Seq_   uint64
@@ -114,22 +115,22 @@ type CallContract struct {
 	Params []byte
 }
 
-// IsUTXO TODO
+// IsUTXO returns false
 func (tx *CallContract) IsUTXO() bool {
 	return false
 }
 
-// From TODO
+// From returns the creator of the transaction
 func (tx *CallContract) From() common.Address {
 	return tx.From_
 }
 
-// Seq TODO
+// Seq returns the sequence of the transaction
 func (tx *CallContract) Seq() uint64 {
 	return tx.Seq_
 }
 
-// Hash TODO
+// Hash returns the hash value of it
 func (tx *CallContract) Hash() hash.Hash256 {
 	var buffer bytes.Buffer
 	if _, err := tx.WriteTo(&buffer); err != nil {
@@ -138,7 +139,7 @@ func (tx *CallContract) Hash() hash.Hash256 {
 	return hash.DoubleHash(buffer.Bytes())
 }
 
-// WriteTo TODO
+// WriteTo is a serialization function
 func (tx *CallContract) WriteTo(w io.Writer) (int64, error) {
 	var wrote int64
 	if n, err := tx.Base.WriteTo(w); err != nil {
@@ -179,7 +180,7 @@ func (tx *CallContract) WriteTo(w io.Writer) (int64, error) {
 	return wrote, nil
 }
 
-// ReadFrom TODO
+// ReadFrom is a deserialization function
 func (tx *CallContract) ReadFrom(r io.Reader) (int64, error) {
 	var read int64
 	if n, err := tx.Base.ReadFrom(r); err != nil {

@@ -22,12 +22,13 @@ func init() {
 	})
 }
 
-// Account TODO
+// Account is a solidity.Account
+// It is used to store a state of the solidity execution result
 type Account struct {
 	account.Base
 }
 
-// Clone TODO
+// Clone returns the clonend value of it
 func (acc *Account) Clone() account.Account {
 	balanceHash := map[uint64]*amount.Amount{}
 	for k, v := range acc.BalanceHash {
@@ -42,7 +43,7 @@ func (acc *Account) Clone() account.Account {
 	}
 }
 
-// WriteTo TODO
+// WriteTo is a serialization function
 func (acc *Account) WriteTo(w io.Writer) (int64, error) {
 	var wrote int64
 	if n, err := acc.Base.WriteTo(w); err != nil {
@@ -53,7 +54,7 @@ func (acc *Account) WriteTo(w io.Writer) (int64, error) {
 	return wrote, nil
 }
 
-// ReadFrom TODO
+// ReadFrom is a deserialization function
 func (acc *Account) ReadFrom(r io.Reader) (int64, error) {
 	var read int64
 	if n, err := acc.Base.ReadFrom(r); err != nil {

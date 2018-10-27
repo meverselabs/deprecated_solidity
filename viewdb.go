@@ -15,27 +15,29 @@ import (
 var ()
 
 // ViewDB is an EVM database for full state querying.
+// It doesn't allow any modification of DB
+// It is used to execute view query
 type ViewDB struct {
 	ChainCoord *common.Coordinate
 	Loader     data.Loader
 }
 
-// CreateAccount TODO
+// CreateAccount is not allowed
 func (sd *ViewDB) CreateAccount(addr common.Address) {
 	panic(ErrNotAllowed)
 }
 
-// SubBalance TODO
+// SubBalance is not allowed
 func (sd *ViewDB) SubBalance(addr common.Address, b *amount.Amount) {
 	panic(ErrNotAllowed)
 }
 
-//AddBalance TODO
+// AddBalance is not allowed
 func (sd *ViewDB) AddBalance(addr common.Address, b *amount.Amount) {
 	panic(ErrNotAllowed)
 }
 
-// GetBalance TODO
+// GetBalance returns the target chain balance from the account of the address
 func (sd *ViewDB) GetBalance(addr common.Address) *amount.Amount {
 	acc, err := sd.Loader.Account(addr)
 	if err != nil {
@@ -44,32 +46,32 @@ func (sd *ViewDB) GetBalance(addr common.Address) *amount.Amount {
 	return acc.Balance(sd.ChainCoord)
 }
 
-// GetSeq TODO
+// GetSeq returns the sequence of the address
 func (sd *ViewDB) GetSeq(addr common.Address) uint64 {
 	return sd.Loader.Seq(addr)
 }
 
-// AddSeq TODO
+// AddSeq is not allowed
 func (sd *ViewDB) AddSeq(addr common.Address) {
 	panic(ErrNotAllowed)
 }
 
-// GetCodeHash TODO
+// GetCodeHash returns the code hash of the address
 func (sd *ViewDB) GetCodeHash(addr common.Address) hash.Hash256 {
 	return sd.GetState(addr, KeywordCodeHash)
 }
 
-// GetCode TODO
+// GetCode returns the code of the address
 func (sd *ViewDB) GetCode(addr common.Address) []byte {
 	return sd.Loader.AccountData(addr, KeywordCode[:])
 }
 
-// SetCode TODO
+// SetCode is not allowed
 func (sd *ViewDB) SetCode(addr common.Address, code []byte) {
 	panic(ErrNotAllowed)
 }
 
-// GetCodeSize TODO
+// GetCodeSize returns the code size of the address
 func (sd *ViewDB) GetCodeSize(addr common.Address) int {
 	bs := sd.Loader.AccountData(addr, KeywordCodeSize[:])
 	var Len int
@@ -79,7 +81,7 @@ func (sd *ViewDB) GetCodeSize(addr common.Address) int {
 	return Len
 }
 
-// GetState TODO
+// GetState returns value by the hash of the address
 func (sd *ViewDB) GetState(addr common.Address, h hash.Hash256) hash.Hash256 {
 	var ret hash.Hash256
 	bs := sd.Loader.AccountData(addr, h[:])
@@ -89,24 +91,24 @@ func (sd *ViewDB) GetState(addr common.Address, h hash.Hash256) hash.Hash256 {
 	return ret
 }
 
-// SetState TODO
+// SetState is not allowed
 func (sd *ViewDB) SetState(addr common.Address, h hash.Hash256, v hash.Hash256) {
 	panic(ErrNotAllowed)
 }
 
-// Suicide TODO
+// Suicide is not allowed
 func (sd *ViewDB) Suicide(addr common.Address) bool {
 	panic(ErrNotAllowed)
 	return false
 }
 
-// HasSuicided TODO
+// HasSuicided checks the dead state of the address
 func (sd *ViewDB) HasSuicided(addr common.Address) bool {
 	bs := sd.Loader.AccountData(addr, KeywordSuicide[:])
 	return len(bs) > 0 && bs[0] == 1
 }
 
-// Exist TODO
+// Exist checks that the account of the address is exist or not
 func (sd *ViewDB) Exist(addr common.Address) bool {
 	if exist, err := sd.Loader.IsExistAccount(addr); err != nil {
 		panic(err)
@@ -115,7 +117,7 @@ func (sd *ViewDB) Exist(addr common.Address) bool {
 	}
 }
 
-// Empty TODO
+// Empty checks that seq == 0, balance == 0, code size == 0
 func (sd *ViewDB) Empty(addr common.Address) bool {
 	if acc, err := sd.Loader.Account(addr); err != nil {
 		if err != data.ErrNotExistAccount {
@@ -128,20 +130,20 @@ func (sd *ViewDB) Empty(addr common.Address) bool {
 	}
 }
 
-// RevertToSnapshot TODO
+// RevertToSnapshot doesn't work
 func (sd *ViewDB) RevertToSnapshot(n int) {
 }
 
-// CommitSnapshot TODO
+// CommitSnapshot doesn't work
 func (sd *ViewDB) CommitSnapshot(n int) {
 }
 
-// Snapshot TODO
+// Snapshot doesn't work
 func (sd *ViewDB) Snapshot() int {
 	return 0
 }
 
-// AddLog TODO
+// AddLog not implemented yet
 func (sd *ViewDB) AddLog(l *vm.Log) {
 	log.Println("AddLog", l)
 }

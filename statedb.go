@@ -32,7 +32,7 @@ type StateDB struct {
 	Context    *data.Context
 }
 
-// CreateAccount TODO
+// CreateAccount creates the sub account of the address to the context inside of EVM
 func (sd *StateDB) CreateAccount(addr common.Address) {
 	//log.Println("CreateAccount", addr)
 	a, err := sd.Context.Accounter().NewByTypeName("solidity.Account")
@@ -46,7 +46,7 @@ func (sd *StateDB) CreateAccount(addr common.Address) {
 	}
 }
 
-// SubBalance TODO
+// SubBalance reduce the target chain balance from the account of the address
 func (sd *StateDB) SubBalance(addr common.Address, b *amount.Amount) {
 	//log.Println("SubBalance", addr, b)
 	acc, err := sd.Context.Account(addr)
@@ -61,7 +61,7 @@ func (sd *StateDB) SubBalance(addr common.Address, b *amount.Amount) {
 	acc.SetBalance(sd.ChainCoord, balance)
 }
 
-//AddBalance TODO
+// AddBalance add the target chain balance to the account of the address
 func (sd *StateDB) AddBalance(addr common.Address, b *amount.Amount) {
 	//log.Println("AddBalance", addr, b)
 	acc, err := sd.Context.Account(addr)
@@ -73,7 +73,7 @@ func (sd *StateDB) AddBalance(addr common.Address, b *amount.Amount) {
 	acc.SetBalance(sd.ChainCoord, balance)
 }
 
-// GetBalance TODO
+// GetBalance returns the target chain balance from the account of the address
 func (sd *StateDB) GetBalance(addr common.Address) *amount.Amount {
 	//log.Println("GetBalance", addr)
 	acc, err := sd.Context.Account(addr)
@@ -83,31 +83,31 @@ func (sd *StateDB) GetBalance(addr common.Address) *amount.Amount {
 	return acc.Balance(sd.ChainCoord)
 }
 
-// GetSeq TODO
+// GetSeq returns the sequence of the address
 func (sd *StateDB) GetSeq(addr common.Address) uint64 {
 	//log.Println("GetSeq", addr)
 	return sd.Context.Seq(addr)
 }
 
-// AddSeq TODO
+// AddSeq adds the sequence of the address
 func (sd *StateDB) AddSeq(addr common.Address) {
 	//log.Println("AddSeq", addr)
 	sd.Context.AddSeq(addr)
 }
 
-// GetCodeHash TODO
+// GetCodeHash returns the code hash of the address
 func (sd *StateDB) GetCodeHash(addr common.Address) hash.Hash256 {
 	//log.Println("GetCodeHash", addr)
 	return sd.GetState(addr, KeywordCodeHash)
 }
 
-// GetCode TODO
+// GetCode returns the code of the address
 func (sd *StateDB) GetCode(addr common.Address) []byte {
 	//log.Println("GetCode", addr)
 	return sd.Context.AccountData(addr, KeywordCode[:])
 }
 
-// SetCode TODO
+// SetCode updates the code to the address
 func (sd *StateDB) SetCode(addr common.Address, code []byte) {
 	//log.Println("SetCode", addr, code)
 	sd.Context.SetAccountData(addr, KeywordCode[:], code)
@@ -118,7 +118,7 @@ func (sd *StateDB) SetCode(addr common.Address, code []byte) {
 	sd.Context.SetAccountData(addr, KeywordCodeSize[:], bs)
 }
 
-// GetCodeSize TODO
+// GetCodeSize returns the code size of the address
 func (sd *StateDB) GetCodeSize(addr common.Address) int {
 	//log.Println("GetCodeSize", addr)
 	bs := sd.Context.AccountData(addr, KeywordCodeSize[:])
@@ -129,7 +129,7 @@ func (sd *StateDB) GetCodeSize(addr common.Address) int {
 	return Len
 }
 
-// GetState TODO
+// GetState returns value by the hash of the address
 func (sd *StateDB) GetState(addr common.Address, h hash.Hash256) hash.Hash256 {
 	//log.Println("GetState", addr, h)
 	var ret hash.Hash256
@@ -140,7 +140,7 @@ func (sd *StateDB) GetState(addr common.Address, h hash.Hash256) hash.Hash256 {
 	return ret
 }
 
-// SetState TODO
+// SetState updates value by the hash of the address
 func (sd *StateDB) SetState(addr common.Address, h hash.Hash256, v hash.Hash256) {
 	//log.Println("SetState", addr, h, v)
 	if KeywordMap[h] {
@@ -149,21 +149,21 @@ func (sd *StateDB) SetState(addr common.Address, h hash.Hash256, v hash.Hash256)
 	sd.Context.SetAccountData(addr, h[:], v[:])
 }
 
-// Suicide TODO
+// Suicide make the address to dead state
 func (sd *StateDB) Suicide(addr common.Address) bool {
 	//log.Println("Suicide", addr)
 	sd.Context.SetAccountData(addr, KeywordSuicide[:], []byte{1})
 	return true
 }
 
-// HasSuicided TODO
+// HasSuicided checks the dead state of the address
 func (sd *StateDB) HasSuicided(addr common.Address) bool {
 	//log.Println("HasSuicided", addr)
 	bs := sd.Context.AccountData(addr, KeywordSuicide[:])
 	return len(bs) > 0 && bs[0] == 1
 }
 
-// Exist TODO
+// Exist checks that the account of the address is exist or not
 func (sd *StateDB) Exist(addr common.Address) bool {
 	//log.Println("Exist", addr)
 	if exist, err := sd.Context.IsExistAccount(addr); err != nil {
@@ -173,7 +173,7 @@ func (sd *StateDB) Exist(addr common.Address) bool {
 	}
 }
 
-// Empty TODO
+// Empty checks that seq == 0, balance == 0, code size == 0
 func (sd *StateDB) Empty(addr common.Address) bool {
 	//log.Println("Empty", addr)
 	if acc, err := sd.Context.Account(addr); err != nil {
@@ -187,26 +187,26 @@ func (sd *StateDB) Empty(addr common.Address) bool {
 	}
 }
 
-// RevertToSnapshot TODO
+// RevertToSnapshot removes snapshots after the snapshot number
 func (sd *StateDB) RevertToSnapshot(n int) {
 	//log.Println("RevertToSnapshot", n)
 	sd.Context.Revert(n)
 }
 
-// CommitSnapshot TODO
+// CommitSnapshot apply snapshots to the top after the snapshot number
 func (sd *StateDB) CommitSnapshot(n int) {
 	//log.Println("CommitSnapshot", n)
 	sd.Context.Commit(n)
 }
 
-// Snapshot TODO
+// Snapshot push a snapshot and returns the snapshot number of it
 func (sd *StateDB) Snapshot() int {
 	n := sd.Context.Snapshot()
 	//log.Println("Snapshot", n)
 	return n
 }
 
-// AddLog TODO
+// AddLog not implemented yet
 func (sd *StateDB) AddLog(l *vm.Log) {
 	log.Println("AddLog", l)
 }
