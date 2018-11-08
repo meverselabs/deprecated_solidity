@@ -94,7 +94,7 @@ func init() {
 			Difficulty:  new(big.Int),
 		}
 		evm := vm.NewEVM(vctx, statedb, vmCfg)
-		ret, err = evm.Call(vm.AccountRef(tx.From()), tx.To, append(tx.Method, tx.Params...), amount.NewCoinAmount(0, 0))
+		ret, err = evm.Call(vm.AccountRef(tx.From()), tx.To, append(tx.Method, tx.Params...), tx.Amount)
 		if err != nil {
 			return nil, err
 		}
