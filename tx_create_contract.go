@@ -79,18 +79,14 @@ func init() {
 		}
 		ctx.AddSeq(tx.From())
 
-		fromAcc, err := ctx.Account(tx.From())
+		chainCoord := ctx.ChainCoord()
+		fromBalance, err := ctx.AccountBalance(tx.From())
 		if err != nil {
 			return nil, err
 		}
-
-		chainCoord := ctx.ChainCoord()
-		balance := fromAcc.Balance(chainCoord)
-		if balance.Less(Fee) {
-			return nil, ErrInsuffcientBalance
+		if err := fromBalance.SubBalance(chainCoord, Fee); err != nil {
+			return nil, err
 		}
-		balance = balance.Sub(Fee)
-		fromAcc.SetBalance(chainCoord, balance)
 
 		contAddr := common.NewAddress(coord, chainCoord, 0)
 		if is, err := ctx.IsExistAccount(contAddr); err != nil {

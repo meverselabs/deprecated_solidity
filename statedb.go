@@ -49,38 +49,33 @@ func (sd *StateDB) CreateAccount(addr common.Address) {
 // SubBalance reduce the target chain balance from the account of the address
 func (sd *StateDB) SubBalance(addr common.Address, b *amount.Amount) {
 	//log.Println("SubBalance", addr, b)
-	acc, err := sd.Context.Account(addr)
+	balance, err := sd.Context.AccountBalance(addr)
 	if err != nil {
 		panic(err)
 	}
-	balance := acc.Balance(sd.ChainCoord)
-	if balance.Less(b) {
-		panic("")
+	if err := balance.SubBalance(sd.ChainCoord, b); err != nil {
+		panic(err)
 	}
-	balance = balance.Sub(b)
-	acc.SetBalance(sd.ChainCoord, balance)
 }
 
 // AddBalance add the target chain balance to the account of the address
 func (sd *StateDB) AddBalance(addr common.Address, b *amount.Amount) {
 	//log.Println("AddBalance", addr, b)
-	acc, err := sd.Context.Account(addr)
+	balance, err := sd.Context.AccountBalance(addr)
 	if err != nil {
 		panic(err)
 	}
-	balance := acc.Balance(sd.ChainCoord)
-	balance = balance.Add(b)
-	acc.SetBalance(sd.ChainCoord, balance)
+	balance.AddBalance(sd.ChainCoord, b)
 }
 
 // GetBalance returns the target chain balance from the account of the address
 func (sd *StateDB) GetBalance(addr common.Address) *amount.Amount {
 	//log.Println("GetBalance", addr)
-	acc, err := sd.Context.Account(addr)
+	balance, err := sd.Context.AccountBalance(addr)
 	if err != nil {
 		panic(err)
 	}
-	return acc.Balance(sd.ChainCoord)
+	return balance.Balance(sd.ChainCoord)
 }
 
 // GetSeq returns the sequence of the address
@@ -176,15 +171,11 @@ func (sd *StateDB) Exist(addr common.Address) bool {
 // Empty checks that seq == 0, balance == 0, code size == 0
 func (sd *StateDB) Empty(addr common.Address) bool {
 	//log.Println("Empty", addr)
-	if acc, err := sd.Context.Account(addr); err != nil {
-		if err != data.ErrNotExistAccount {
-			panic(err)
-		}
-		return true
-	} else {
-		balance := acc.Balance(sd.ChainCoord)
-		return sd.Context.Seq(addr) == 0 && balance.IsZero() && sd.GetCodeSize(addr) == 0
+	balance, err := sd.Context.AccountBalance(addr)
+	if err != nil {
+		panic(err)
 	}
+	return sd.Context.Seq(addr) == 0 && balance.Balance(sd.ChainCoord).IsZero() && sd.GetCodeSize(addr) == 0
 }
 
 // RevertToSnapshot removes snapshots after the snapshot number

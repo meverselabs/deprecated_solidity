@@ -39,11 +39,11 @@ func (sd *ViewDB) AddBalance(addr common.Address, b *amount.Amount) {
 
 // GetBalance returns the target chain balance from the account of the address
 func (sd *ViewDB) GetBalance(addr common.Address) *amount.Amount {
-	acc, err := sd.Loader.Account(addr)
+	balance, err := sd.Loader.AccountBalance(addr)
 	if err != nil {
 		panic(err)
 	}
-	return acc.Balance(sd.ChainCoord)
+	return balance.Balance(sd.ChainCoord)
 }
 
 // GetSeq returns the sequence of the address
@@ -119,15 +119,11 @@ func (sd *ViewDB) Exist(addr common.Address) bool {
 
 // Empty checks that seq == 0, balance == 0, code size == 0
 func (sd *ViewDB) Empty(addr common.Address) bool {
-	if acc, err := sd.Loader.Account(addr); err != nil {
-		if err != data.ErrNotExistAccount {
-			panic(err)
-		}
-		return true
-	} else {
-		balance := acc.Balance(sd.ChainCoord)
-		return sd.Loader.Seq(addr) == 0 && balance.IsZero() && sd.GetCodeSize(addr) == 0
+	balance, err := sd.Loader.AccountBalance(addr)
+	if err != nil {
+		panic(err)
 	}
+	return sd.Loader.Seq(addr) == 0 && balance.Balance(sd.ChainCoord).IsZero() && sd.GetCodeSize(addr) == 0
 }
 
 // RevertToSnapshot doesn't work

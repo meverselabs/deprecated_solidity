@@ -5,7 +5,6 @@ import (
 
 	"git.fleta.io/fleta/common"
 	"git.fleta.io/fleta/core/account"
-	"git.fleta.io/fleta/core/amount"
 	"git.fleta.io/fleta/core/data"
 )
 
@@ -13,8 +12,7 @@ func init() {
 	data.RegisterAccount("solidity.Account", func(t account.Type) account.Account {
 		return &Account{
 			Base: account.Base{
-				Type_:       t,
-				BalanceHash: map[uint64]*amount.Amount{},
+				Type_: t,
 			},
 		}
 	}, func(loader data.Loader, a account.Account, signers []common.PublicHash) error {
@@ -30,15 +28,10 @@ type Account struct {
 
 // Clone returns the clonend value of it
 func (acc *Account) Clone() account.Account {
-	balanceHash := map[uint64]*amount.Amount{}
-	for k, v := range acc.BalanceHash {
-		balanceHash[k] = v.Clone()
-	}
 	return &Account{
 		Base: account.Base{
-			Address_:    acc.Address_,
-			Type_:       acc.Type_,
-			BalanceHash: balanceHash,
+			Address_: acc.Address_,
+			Type_:    acc.Type_,
 		},
 	}
 }
