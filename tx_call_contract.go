@@ -16,10 +16,10 @@ import (
 )
 
 func init() {
-	data.RegisterTransaction("solidity.CallContract", func(t transaction.Type) transaction.Transaction {
+	data.RegisterTransaction("solidity.CallContract", func(coord *common.Coordinate, t transaction.Type) transaction.Transaction {
 		return &CallContract{
 			Base: transaction.Base{
-				ChainCoord_: &common.Coordinate{},
+				ChainCoord_: coord,
 				Type_:       t,
 			},
 		}

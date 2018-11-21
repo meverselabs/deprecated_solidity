@@ -28,10 +28,10 @@ func UnregisterAllowedKey(ChainCoord *common.Coordinate) {
 }
 
 func init() {
-	data.RegisterTransaction("solidity.CreateContract", func(t transaction.Type) transaction.Transaction {
+	data.RegisterTransaction("solidity.CreateContract", func(coord *common.Coordinate, t transaction.Type) transaction.Transaction {
 		return &CreateContract{
 			Base: transaction.Base{
-				ChainCoord_: &common.Coordinate{},
+				ChainCoord_: coord,
 				Type_:       t,
 			},
 		}
