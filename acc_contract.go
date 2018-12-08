@@ -9,8 +9,8 @@ import (
 )
 
 func init() {
-	data.RegisterAccount("solidity.Account", func(t account.Type) account.Account {
-		return &Account{
+	data.RegisterAccount("solidity.ContractAccount", func(t account.Type) account.Account {
+		return &ContractAccount{
 			Base: account.Base{
 				Type_: t,
 			},
@@ -20,15 +20,15 @@ func init() {
 	})
 }
 
-// Account is a solidity.Account
+// ContractAccount is a solidity.ContractAccount
 // It is used to store a state of the solidity execution result
-type Account struct {
+type ContractAccount struct {
 	account.Base
 }
 
 // Clone returns the clonend value of it
-func (acc *Account) Clone() account.Account {
-	return &Account{
+func (acc *ContractAccount) Clone() account.Account {
+	return &ContractAccount{
 		Base: account.Base{
 			Address_: acc.Address_,
 			Type_:    acc.Type_,
@@ -37,7 +37,7 @@ func (acc *Account) Clone() account.Account {
 }
 
 // WriteTo is a serialization function
-func (acc *Account) WriteTo(w io.Writer) (int64, error) {
+func (acc *ContractAccount) WriteTo(w io.Writer) (int64, error) {
 	var wrote int64
 	if n, err := acc.Base.WriteTo(w); err != nil {
 		return wrote, err
@@ -48,7 +48,7 @@ func (acc *Account) WriteTo(w io.Writer) (int64, error) {
 }
 
 // ReadFrom is a deserialization function
-func (acc *Account) ReadFrom(r io.Reader) (int64, error) {
+func (acc *ContractAccount) ReadFrom(r io.Reader) (int64, error) {
 	var read int64
 	if n, err := acc.Base.ReadFrom(r); err != nil {
 		return read, err
