@@ -7,8 +7,8 @@ import (
 	"math/big"
 
 	"git.fleta.io/fleta/common/hash"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
+	"git.fleta.io/fleta/solidity/vm/hexutil"
+	"git.fleta.io/fleta/solidity/vm/math"
 )
 
 var _ = (*structLogMarshaling)(nil)

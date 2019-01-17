@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"github.com/ethereum/go-ethereum/common/math"
+	"git.fleta.io/fleta/solidity/vm/math"
 )
 
 // Config are the configuration options for the Interpreter

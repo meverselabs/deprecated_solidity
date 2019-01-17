@@ -19,16 +19,36 @@ package vm
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
+	"git.fleta.io/fleta/solidity/vm/math"
 )
 
-var big32 = big.NewInt(32)
+// Common comes from github.com/ethereum/go-ethereum/common/big.go
+var (
+	Big1   = big.NewInt(1)
+	Big2   = big.NewInt(2)
+	Big3   = big.NewInt(3)
+	Big0   = big.NewInt(0)
+	Big32  = big.NewInt(32)
+	Big256 = big.NewInt(256)
+	Big257 = big.NewInt(257)
+)
+
+// RightPadBytes comes from github.com/ethereum/go-ethereum/common/bytes.go
+func RightPadBytes(slice []byte, l int) []byte {
+	if l <= len(slice) {
+		return slice
+	}
+
+	padded := make([]byte, l)
+	copy(padded, slice)
+
+	return padded
+}
 
 // calculates the memory size required for a step
 func calcMemSize(off, l *big.Int) *big.Int {
 	if l.Sign() == 0 {
-		return common.Big0
+		return Big0
 	}
 
 	return new(big.Int).Add(off, l)
@@ -45,7 +65,7 @@ func getData(data []byte, start uint64, size uint64) []byte {
 	if end > length {
 		end = length
 	}
-	return common.RightPadBytes(data[start:end], int(size))
+	return RightPadBytes(data[start:end], int(size))
 }
 
 // getDataBig returns a slice from the data based on the start and size and pads
@@ -55,7 +75,7 @@ func getDataBig(data []byte, start *big.Int, size *big.Int) []byte {
 
 	s := math.BigMin(start, dlen)
 	e := math.BigMin(new(big.Int).Add(s, size), dlen)
-	return common.RightPadBytes(data[s.Uint64():e.Uint64()], int(size.Uint64()))
+	return RightPadBytes(data[s.Uint64():e.Uint64()], int(size.Uint64()))
 }
 
 // bigUint64 returns the integer casted to a uint64 and returns whether it

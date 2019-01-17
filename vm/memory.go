@@ -20,12 +20,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common/math"
+	"git.fleta.io/fleta/solidity/vm/math"
 )
 
 // Memory implements a simple memory model for the ethereum virtual machine.
 type Memory struct {
-	store       []byte
+	store []byte
 }
 
 func NewMemory() *Memory {

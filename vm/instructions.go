@@ -21,12 +21,10 @@ import (
 	"fmt"
 	"math/big"
 
-	"git.fleta.io/fleta/core/amount"
-
+	ecrypto "git.fleta.io/fleta/common/crypto"
 	"git.fleta.io/fleta/common/hash"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/crypto"
+	"git.fleta.io/fleta/core/amount"
+	"git.fleta.io/fleta/solidity/vm/math"
 )
 
 var (
@@ -137,8 +135,8 @@ func opSignExtend(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stac
 	if back.Cmp(big.NewInt(31)) < 0 {
 		bit := uint(back.Uint64()*8 + 7)
 		num := stack.pop()
-		mask := back.Lsh(common.Big1, bit)
-		mask.Sub(mask, common.Big1)
+		mask := back.Lsh(Big1, bit)
+		mask.Sub(mask, Big1)
 		if num.Bit(int(bit)) > 0 {
 			num.Or(num, mask.Not(mask))
 		} else {
@@ -275,7 +273,7 @@ func opXor(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stac
 
 func opByte(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	th, val := stack.pop(), stack.peek()
-	if th.Cmp(common.Big32) < 0 {
+	if th.Cmp(Big32) < 0 {
 		b := math.Byte(val, 32, int(th.Int64()))
 		val.SetUint64(uint64(b))
 	} else {
@@ -319,7 +317,7 @@ func opSHL(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stac
 	shift, value := math.U256(stack.pop()), math.U256(stack.peek())
 	defer evm.interpreter.intPool.put(shift) // First operand back into the pool
 
-	if shift.Cmp(common.Big256) >= 0 {
+	if shift.Cmp(Big256) >= 0 {
 		value.SetUint64(0)
 		return nil, nil
 	}
@@ -337,7 +335,7 @@ func opSHR(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stac
 	shift, value := math.U256(stack.pop()), math.U256(stack.peek())
 	defer evm.interpreter.intPool.put(shift) // First operand back into the pool
 
-	if shift.Cmp(common.Big256) >= 0 {
+	if shift.Cmp(Big256) >= 0 {
 		value.SetUint64(0)
 		return nil, nil
 	}
@@ -355,7 +353,7 @@ func opSAR(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stac
 	shift, value := math.U256(stack.pop()), math.S256(stack.pop())
 	defer evm.interpreter.intPool.put(shift) // First operand back into the pool
 
-	if shift.Cmp(common.Big256) >= 0 {
+	if shift.Cmp(Big256) >= 0 {
 		if value.Sign() > 0 {
 			value.SetUint64(0)
 		} else {
@@ -374,7 +372,7 @@ func opSAR(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stac
 func opSha3(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	offset, size := stack.pop(), stack.pop()
 	data := memory.Get(offset.Int64(), size.Int64())
-	hash := crypto.Keccak256(data)
+	hash := ecrypto.Keccak256(data)
 
 	stack.push(evm.interpreter.intPool.get().SetBytes(hash))
 
@@ -409,7 +407,7 @@ func opCallValue(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack
 }
 
 func opCallDataLoad(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	stack.push(evm.interpreter.intPool.get().SetBytes(getDataBig(contract.Input, stack.pop(), big32)))
+	stack.push(evm.interpreter.intPool.get().SetBytes(getDataBig(contract.Input, stack.pop(), Big32)))
 	return nil, nil
 }
 
@@ -497,7 +495,7 @@ func opExtCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, sta
 func opBlockhash(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	num := stack.pop()
 
-	n := evm.interpreter.intPool.get().Sub(evm.BlockNumber, common.Big257)
+	n := evm.interpreter.intPool.get().Sub(evm.BlockNumber, Big257)
 	if num.Cmp(n) > 0 && num.Cmp(evm.BlockNumber) < 0 {
 		stack.push(HashToBig(evm.GetHash(num.Uint64())))
 	} else {
@@ -802,7 +800,7 @@ func makePush(size uint64, pushByteSize int) executionFunc {
 		}
 
 		integer := evm.interpreter.intPool.get()
-		stack.push(integer.SetBytes(common.RightPadBytes(contract.Code[startMin:endMin], pushByteSize)))
+		stack.push(integer.SetBytes(RightPadBytes(contract.Code[startMin:endMin], pushByteSize)))
 
 		*pc += size
 		return nil, nil

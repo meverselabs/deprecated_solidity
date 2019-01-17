@@ -26,8 +26,8 @@ import (
 	"git.fleta.io/fleta/common"
 	"git.fleta.io/fleta/common/hash"
 	"git.fleta.io/fleta/core/amount"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
+	"git.fleta.io/fleta/solidity/vm/hexutil"
+	"git.fleta.io/fleta/solidity/vm/math"
 )
 
 type Storage map[hash.Hash256]hash.Hash256
