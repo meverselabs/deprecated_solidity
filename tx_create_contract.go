@@ -1,7 +1,6 @@
 package solidity
 
 import (
-	"bytes"
 	"io"
 	"math/big"
 	"time"
@@ -15,16 +14,16 @@ import (
 	"git.fleta.io/fleta/solidity/vm"
 )
 
-var allowedKeyHash = map[uint64]common.PublicHash{}
+var allowedKeyMap = map[uint64]common.PublicHash{}
 
 // RegisterAllowedKey TODO
 func RegisterAllowedKey(ChainCoord *common.Coordinate, KeyHash common.PublicHash) {
-	allowedKeyHash[ChainCoord.ID()] = KeyHash
+	allowedKeyMap[ChainCoord.ID()] = KeyHash
 }
 
 // UnregisterAllowedKey TODO
 func UnregisterAllowedKey(ChainCoord *common.Coordinate) {
-	delete(allowedKeyHash, ChainCoord.ID())
+	delete(allowedKeyMap, ChainCoord.ID())
 }
 
 func init() {
@@ -44,7 +43,7 @@ func init() {
 		if len(signers) > 1 {
 			return ErrInvalidSignerCount
 		}
-		if pubhash, has := allowedKeyHash[loader.ChainCoord().ID()]; has {
+		if pubhash, has := allowedKeyMap[loader.ChainCoord().ID()]; has {
 			if !signers[0].Equal(pubhash) {
 				return ErrNotAllowed
 			}
@@ -153,11 +152,7 @@ func (tx *CreateContract) Seq() uint64 {
 
 // Hash returns the hash value of it
 func (tx *CreateContract) Hash() hash.Hash256 {
-	var buffer bytes.Buffer
-	if _, err := tx.WriteTo(&buffer); err != nil {
-		panic(err)
-	}
-	return hash.DoubleHash(buffer.Bytes())
+	return hash.DoubleHashByWriterTo(tx)
 }
 
 // WriteTo is a serialization function
