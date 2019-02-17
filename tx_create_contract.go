@@ -16,12 +16,12 @@ import (
 
 var allowedKeyMap = map[uint64]common.PublicHash{}
 
-// RegisterAllowedKey TODO
+// RegisterAllowedKey is used for allowing the contract creation to the specific key hash
 func RegisterAllowedKey(ChainCoord *common.Coordinate, KeyHash common.PublicHash) {
 	allowedKeyMap[ChainCoord.ID()] = KeyHash
 }
 
-// UnregisterAllowedKey TODO
+// UnregisterAllowedKey is used for disallowing the contract creation to the specific key hash
 func UnregisterAllowedKey(ChainCoord *common.Coordinate) {
 	delete(allowedKeyMap, ChainCoord.ID())
 }
@@ -135,7 +135,7 @@ type CreateContract struct {
 	Params []byte
 }
 
-// IsUTXO TODO
+// IsUTXO returns false
 func (tx *CreateContract) IsUTXO() bool {
 	return false
 }
