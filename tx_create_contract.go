@@ -1,6 +1,9 @@
 package solidity
 
 import (
+	"bytes"
+	"encoding/hex"
+	"encoding/json"
 	"io"
 	"math/big"
 	"time"
@@ -218,4 +221,64 @@ func (tx *CreateContract) ReadFrom(r io.Reader) (int64, error) {
 		tx.Params = bs
 	}
 	return read, nil
+}
+
+// MarshalJSON is a marshaler function
+func (tx *CreateContract) MarshalJSON() ([]byte, error) {
+	var buffer bytes.Buffer
+	buffer.WriteString(`{`)
+	buffer.WriteString(`"chain_coord":`)
+	if bs, err := tx.ChainCoord_.MarshalJSON(); err != nil {
+		return nil, err
+	} else {
+		buffer.Write(bs)
+	}
+	buffer.WriteString(`,`)
+	buffer.WriteString(`"timestamp":`)
+	if bs, err := json.Marshal(tx.Timestamp_); err != nil {
+		return nil, err
+	} else {
+		buffer.Write(bs)
+	}
+	buffer.WriteString(`,`)
+	buffer.WriteString(`"type":`)
+	if bs, err := json.Marshal(tx.Type_); err != nil {
+		return nil, err
+	} else {
+		buffer.Write(bs)
+	}
+	buffer.WriteString(`,`)
+	buffer.WriteString(`"seq":`)
+	if bs, err := json.Marshal(tx.Seq_); err != nil {
+		return nil, err
+	} else {
+		buffer.Write(bs)
+	}
+	buffer.WriteString(`,`)
+	buffer.WriteString(`"from":`)
+	if bs, err := tx.From_.MarshalJSON(); err != nil {
+		return nil, err
+	} else {
+		buffer.Write(bs)
+	}
+	buffer.WriteString(`,`)
+	buffer.WriteString(`"code":`)
+	if len(tx.Code) == 0 {
+		buffer.WriteString(`null`)
+	} else {
+		buffer.WriteString(`"`)
+		buffer.WriteString(hex.EncodeToString(tx.Code))
+		buffer.WriteString(`"`)
+	}
+	buffer.WriteString(`,`)
+	buffer.WriteString(`"params":`)
+	if len(tx.Params) == 0 {
+		buffer.WriteString(`null`)
+	} else {
+		buffer.WriteString(`"`)
+		buffer.WriteString(hex.EncodeToString(tx.Params))
+		buffer.WriteString(`"`)
+	}
+	buffer.WriteString(`}`)
+	return buffer.Bytes(), nil
 }

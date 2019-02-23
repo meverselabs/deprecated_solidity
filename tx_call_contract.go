@@ -1,6 +1,9 @@
 package solidity
 
 import (
+	"bytes"
+	"encoding/hex"
+	"encoding/json"
 	"io"
 	"math/big"
 	"time"
@@ -104,8 +107,8 @@ type CallContract struct {
 	transaction.Base
 	Seq_   uint64
 	From_  common.Address
-	To     common.Address
 	Amount *amount.Amount
+	To     common.Address
 	Method []byte
 	Params []byte
 }
@@ -148,12 +151,12 @@ func (tx *CallContract) WriteTo(w io.Writer) (int64, error) {
 	} else {
 		wrote += n
 	}
-	if n, err := tx.To.WriteTo(w); err != nil {
+	if n, err := tx.Amount.WriteTo(w); err != nil {
 		return wrote, err
 	} else {
 		wrote += n
 	}
-	if n, err := tx.Amount.WriteTo(w); err != nil {
+	if n, err := tx.To.WriteTo(w); err != nil {
 		return wrote, err
 	} else {
 		wrote += n
@@ -190,12 +193,12 @@ func (tx *CallContract) ReadFrom(r io.Reader) (int64, error) {
 	} else {
 		read += n
 	}
-	if n, err := tx.To.ReadFrom(r); err != nil {
+	if n, err := tx.Amount.ReadFrom(r); err != nil {
 		return read, err
 	} else {
 		read += n
 	}
-	if n, err := tx.Amount.ReadFrom(r); err != nil {
+	if n, err := tx.To.ReadFrom(r); err != nil {
 		return read, err
 	} else {
 		read += n
@@ -213,4 +216,78 @@ func (tx *CallContract) ReadFrom(r io.Reader) (int64, error) {
 		tx.Params = bs
 	}
 	return read, nil
+}
+
+// MarshalJSON is a marshaler function
+func (tx *CallContract) MarshalJSON() ([]byte, error) {
+	var buffer bytes.Buffer
+	buffer.WriteString(`{`)
+	buffer.WriteString(`"chain_coord":`)
+	if bs, err := tx.ChainCoord_.MarshalJSON(); err != nil {
+		return nil, err
+	} else {
+		buffer.Write(bs)
+	}
+	buffer.WriteString(`,`)
+	buffer.WriteString(`"timestamp":`)
+	if bs, err := json.Marshal(tx.Timestamp_); err != nil {
+		return nil, err
+	} else {
+		buffer.Write(bs)
+	}
+	buffer.WriteString(`,`)
+	buffer.WriteString(`"type":`)
+	if bs, err := json.Marshal(tx.Type_); err != nil {
+		return nil, err
+	} else {
+		buffer.Write(bs)
+	}
+	buffer.WriteString(`,`)
+	buffer.WriteString(`"seq":`)
+	if bs, err := json.Marshal(tx.Seq_); err != nil {
+		return nil, err
+	} else {
+		buffer.Write(bs)
+	}
+	buffer.WriteString(`,`)
+	buffer.WriteString(`"from":`)
+	if bs, err := tx.From_.MarshalJSON(); err != nil {
+		return nil, err
+	} else {
+		buffer.Write(bs)
+	}
+	buffer.WriteString(`,`)
+	buffer.WriteString(`"amount":`)
+	if bs, err := tx.Amount.MarshalJSON(); err != nil {
+		return nil, err
+	} else {
+		buffer.Write(bs)
+	}
+	buffer.WriteString(`,`)
+	buffer.WriteString(`"to":`)
+	if bs, err := tx.To.MarshalJSON(); err != nil {
+		return nil, err
+	} else {
+		buffer.Write(bs)
+	}
+	buffer.WriteString(`,`)
+	buffer.WriteString(`"method":`)
+	if len(tx.Method) == 0 {
+		buffer.WriteString(`null`)
+	} else {
+		buffer.WriteString(`"`)
+		buffer.WriteString(hex.EncodeToString(tx.Method))
+		buffer.WriteString(`"`)
+	}
+	buffer.WriteString(`,`)
+	buffer.WriteString(`"params":`)
+	if len(tx.Params) == 0 {
+		buffer.WriteString(`null`)
+	} else {
+		buffer.WriteString(`"`)
+		buffer.WriteString(hex.EncodeToString(tx.Params))
+		buffer.WriteString(`"`)
+	}
+	buffer.WriteString(`}`)
+	return buffer.Bytes(), nil
 }

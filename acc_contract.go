@@ -1,6 +1,8 @@
 package solidity
 
 import (
+	"bytes"
+	"encoding/json"
 	"io"
 
 	"git.fleta.io/fleta/common"
@@ -56,4 +58,25 @@ func (acc *ContractAccount) ReadFrom(r io.Reader) (int64, error) {
 		read += n
 	}
 	return read, nil
+}
+
+// MarshalJSON is a marshaler function
+func (acc *ContractAccount) MarshalJSON() ([]byte, error) {
+	var buffer bytes.Buffer
+	buffer.WriteString(`{`)
+	buffer.WriteString(`"address":`)
+	if bs, err := acc.Address_.MarshalJSON(); err != nil {
+		return nil, err
+	} else {
+		buffer.Write(bs)
+	}
+	buffer.WriteString(`,`)
+	buffer.WriteString(`"type":`)
+	if bs, err := json.Marshal(acc.Type_); err != nil {
+		return nil, err
+	} else {
+		buffer.Write(bs)
+	}
+	buffer.WriteString(`}`)
+	return buffer.Bytes(), nil
 }
