@@ -288,7 +288,7 @@ func (evm *EVM) StaticCall(caller ContractRef, addr common.Address, input []byte
 }
 
 // Create creates a new contract using code as deployment code.
-func (evm *EVM) Create(caller ContractRef, contractAddr common.Address, code []byte, value *amount.Amount) (ret []byte, err error) {
+func (evm *EVM) Create(caller ContractRef, contractAddr common.Address, contractName string, code []byte, value *amount.Amount) (ret []byte, err error) {
 
 	// Depth check execution. Fail if we're trying to execute above the
 	// limit.
@@ -311,7 +311,7 @@ func (evm *EVM) Create(caller ContractRef, contractAddr common.Address, code []b
 	snapshot := evm.StateDB.Snapshot()
 	defer evm.StateDB.RevertToSnapshot(snapshot)
 
-	evm.StateDB.CreateAccount(contractAddr)
+	evm.StateDB.CreateAccount(contractAddr, contractName)
 	evm.StateDB.AddSeq(contractAddr)
 	evm.Transfer(evm.StateDB, caller.Address(), contractAddr, value)
 

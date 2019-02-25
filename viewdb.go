@@ -23,7 +23,7 @@ type ViewDB struct {
 }
 
 // CreateAccount is not allowed
-func (sd *ViewDB) CreateAccount(addr common.Address) {
+func (sd *ViewDB) CreateAccount(addr common.Address, name string) {
 	panic(ErrNotAllowed)
 }
 

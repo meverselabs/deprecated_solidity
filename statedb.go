@@ -33,7 +33,7 @@ type StateDB struct {
 }
 
 // CreateAccount creates the sub account of the address to the context inside of EVM
-func (sd *StateDB) CreateAccount(addr common.Address) {
+func (sd *StateDB) CreateAccount(addr common.Address, name string) {
 	//log.Println("CreateAccount", addr)
 	a, err := sd.Context.Accounter().NewByTypeName("solidity.ContractAccount")
 	if err != nil {
@@ -41,6 +41,7 @@ func (sd *StateDB) CreateAccount(addr common.Address) {
 	}
 	acc := a.(*ContractAccount)
 	acc.Address_ = addr
+	acc.Name_ = name
 	if err := sd.Context.CreateAccount(acc); err != nil {
 		panic(err)
 	}

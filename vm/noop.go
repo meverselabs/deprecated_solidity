@@ -44,7 +44,7 @@ func (NoopEVMCallContext) DelegateCall(me ContractRef, addr common.Address, data
 
 type NoopStateDB struct{}
 
-func (NoopStateDB) CreateAccount(common.Address)                        {}
+func (NoopStateDB) CreateAccount(common.Address, string)                {}
 func (NoopStateDB) SubBalance(common.Address, *amount.Amount)           {}
 func (NoopStateDB) AddBalance(common.Address, *amount.Amount)           {}
 func (NoopStateDB) GetBalance(common.Address) *amount.Amount            { return nil }

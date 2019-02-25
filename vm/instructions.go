@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"strings"
 
 	ecrypto "git.fleta.io/fleta/common/crypto"
 	"git.fleta.io/fleta/common/hash"
@@ -622,7 +623,7 @@ func opCreate(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *S
 
 	nonce := evm.StateDB.GetSeq(contract.Address()) + 1
 	addr := contract.Address().WithNonce(nonce)
-	res, suberr := evm.Create(contract, addr, input, amount.NewAmountFromBytes(value.Bytes()))
+	res, suberr := evm.Create(contract, addr, pad(addr.String(), 8), input, amount.NewAmountFromBytes(value.Bytes()))
 	// Push item on the stack based on the returned error. If the ruleset is
 	// homestead we must check for Error (homestead only
 	// rule) and treat as an error, if the ruleset is frontier we must
@@ -822,5 +823,17 @@ func makeSwap(size int64) executionFunc {
 	return func(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 		stack.swap(int(size))
 		return nil, nil
+	}
+}
+
+func pad(str string, size int) string {
+	if len(str) >= size {
+		return str
+	} else {
+		list := []string{}
+		for i := len(str); i < size; i++ {
+			list = append(list, "0")
+		}
+		return strings.Join(list, "")
 	}
 }

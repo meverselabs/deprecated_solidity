@@ -95,7 +95,12 @@ func init() {
 			return nil, err
 		} else if is {
 			return nil, ErrExistAddress
+		} else if isn, err := ctx.IsExistAccountName(tx.Name); err != nil {
+			return nil, err
+		} else if isn {
+			return nil, ErrExistAccountName
 		}
+
 		statedb := &StateDB{
 			ChainCoord: chainCoord,
 			Context:    ctx,
@@ -119,7 +124,7 @@ func init() {
 			Difficulty:  new(big.Int),
 		}
 		evm := vm.NewEVM(vctx, statedb, vmCfg)
-		code, err := evm.Create(vm.AccountRef(tx.From()), contAddr, append(tx.Code, tx.Params...), amount.NewCoinAmount(0, 0))
+		code, err := evm.Create(vm.AccountRef(tx.From()), contAddr, tx.Name, append(tx.Code, tx.Params...), amount.NewCoinAmount(0, 0))
 		if err != nil {
 			return nil, err
 		}
@@ -134,6 +139,7 @@ type CreateContract struct {
 	transaction.Base
 	Seq_   uint64
 	From_  common.Address
+	Name   string
 	Code   []byte
 	Params []byte
 }
@@ -176,6 +182,11 @@ func (tx *CreateContract) WriteTo(w io.Writer) (int64, error) {
 	} else {
 		wrote += n
 	}
+	if n, err := util.WriteString(w, tx.Name); err != nil {
+		return wrote, err
+	} else {
+		wrote += n
+	}
 	if n, err := util.WriteBytes(w, tx.Code); err != nil {
 		return wrote, err
 	} else {
@@ -207,6 +218,12 @@ func (tx *CreateContract) ReadFrom(r io.Reader) (int64, error) {
 		return read, err
 	} else {
 		read += n
+	}
+	if v, n, err := util.ReadString(r); err != nil {
+		return read, err
+	} else {
+		read += n
+		tx.Name = v
 	}
 	if bs, n, err := util.ReadBytes(r); err != nil {
 		return read, err
