@@ -34,8 +34,9 @@ type ContractAccount struct {
 func (acc *ContractAccount) Clone() account.Account {
 	return &ContractAccount{
 		Base: account.Base{
-			Address_: acc.Address_,
 			Type_:    acc.Type_,
+			Address_: acc.Address_,
+			Balance_: acc.Balance(),
 		},
 	}
 }
