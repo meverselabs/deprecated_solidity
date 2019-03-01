@@ -11,15 +11,11 @@ import (
 	"git.fleta.io/fleta/solidity/vm"
 )
 
-// ViewDB errors
-var ()
-
 // ViewDB is an EVM database for full state querying.
 // It doesn't allow any modification of DB
 // It is used to execute view query
 type ViewDB struct {
-	ChainCoord *common.Coordinate
-	Loader     data.Loader
+	Loader data.Loader
 }
 
 // CreateAccount is not allowed
@@ -39,11 +35,11 @@ func (sd *ViewDB) AddBalance(addr common.Address, b *amount.Amount) {
 
 // GetBalance returns the target chain balance from the account of the address
 func (sd *ViewDB) GetBalance(addr common.Address) *amount.Amount {
-	balance, err := sd.Loader.AccountBalance(addr)
+	acc, err := sd.Loader.Account(addr)
 	if err != nil {
 		panic(err)
 	}
-	return balance.Balance(sd.ChainCoord)
+	return acc.Balance()
 }
 
 // GetSeq returns the sequence of the address
@@ -119,11 +115,11 @@ func (sd *ViewDB) Exist(addr common.Address) bool {
 
 // Empty checks that seq == 0, balance == 0, code size == 0
 func (sd *ViewDB) Empty(addr common.Address) bool {
-	balance, err := sd.Loader.AccountBalance(addr)
+	acc, err := sd.Loader.Account(addr)
 	if err != nil {
 		panic(err)
 	}
-	return sd.Loader.Seq(addr) == 0 && balance.Balance(sd.ChainCoord).IsZero() && sd.GetCodeSize(addr) == 0
+	return sd.Loader.Seq(addr) == 0 && acc.Balance().IsZero() && sd.GetCodeSize(addr) == 0
 }
 
 // RevertToSnapshot doesn't work

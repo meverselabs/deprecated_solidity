@@ -18,11 +18,10 @@ import (
 )
 
 func init() {
-	data.RegisterTransaction("solidity.CallContract", func(coord *common.Coordinate, t transaction.Type) transaction.Transaction {
+	data.RegisterTransaction("solidity.CallContract", func(t transaction.Type) transaction.Transaction {
 		return &CallContract{
 			Base: transaction.Base{
-				ChainCoord_: coord,
-				Type_:       t,
+				Type_: t,
 			},
 		}
 	}, func(loader data.Loader, t transaction.Transaction, signers []common.PublicHash) error {
@@ -60,18 +59,16 @@ func init() {
 		}
 		ctx.AddSeq(tx.From())
 
-		chainCoord := ctx.ChainCoord()
-		fromBalance, err := ctx.AccountBalance(tx.From())
+		fromAcc, err := ctx.Account(tx.From())
 		if err != nil {
 			return nil, err
 		}
-		if err := fromBalance.SubBalance(chainCoord, Fee); err != nil {
+		if err := fromAcc.SubBalance(Fee); err != nil {
 			return nil, err
 		}
 
 		statedb := &StateDB{
-			ChainCoord: chainCoord,
-			Context:    ctx,
+			Context: ctx,
 		}
 		logconfig := &vm.LogConfig{
 			DisableMemory: false,
@@ -222,8 +219,8 @@ func (tx *CallContract) ReadFrom(r io.Reader) (int64, error) {
 func (tx *CallContract) MarshalJSON() ([]byte, error) {
 	var buffer bytes.Buffer
 	buffer.WriteString(`{`)
-	buffer.WriteString(`"chain_coord":`)
-	if bs, err := tx.ChainCoord_.MarshalJSON(); err != nil {
+	buffer.WriteString(`"type":`)
+	if bs, err := json.Marshal(tx.Type_); err != nil {
 		return nil, err
 	} else {
 		buffer.Write(bs)
@@ -231,13 +228,6 @@ func (tx *CallContract) MarshalJSON() ([]byte, error) {
 	buffer.WriteString(`,`)
 	buffer.WriteString(`"timestamp":`)
 	if bs, err := json.Marshal(tx.Timestamp_); err != nil {
-		return nil, err
-	} else {
-		buffer.Write(bs)
-	}
-	buffer.WriteString(`,`)
-	buffer.WriteString(`"type":`)
-	if bs, err := json.Marshal(tx.Type_); err != nil {
 		return nil, err
 	} else {
 		buffer.Write(bs)

@@ -17,24 +17,23 @@ import (
 	"git.fleta.io/fleta/solidity/vm"
 )
 
-var allowedKeyMap = map[uint64]common.PublicHash{}
+var allowedKeyMap = map[common.PublicHash]bool{}
 
 // RegisterAllowedKey is used for allowing the contract creation to the specific key hash
-func RegisterAllowedKey(ChainCoord *common.Coordinate, KeyHash common.PublicHash) {
-	allowedKeyMap[ChainCoord.ID()] = KeyHash
+func RegisterAllowedKey(KeyHash common.PublicHash) {
+	allowedKeyMap[KeyHash] = true
 }
 
 // UnregisterAllowedKey is used for disallowing the contract creation to the specific key hash
-func UnregisterAllowedKey(ChainCoord *common.Coordinate) {
-	delete(allowedKeyMap, ChainCoord.ID())
+func UnregisterAllowedKey(KeyHash common.PublicHash) {
+	delete(allowedKeyMap, KeyHash)
 }
 
 func init() {
-	data.RegisterTransaction("solidity.CreateContract", func(coord *common.Coordinate, t transaction.Type) transaction.Transaction {
+	data.RegisterTransaction("solidity.CreateContract", func(t transaction.Type) transaction.Transaction {
 		return &CreateContract{
 			Base: transaction.Base{
-				ChainCoord_: coord,
-				Type_:       t,
+				Type_: t,
 			},
 		}
 	}, func(loader data.Loader, t transaction.Transaction, signers []common.PublicHash) error {
@@ -46,10 +45,8 @@ func init() {
 		if len(signers) > 1 {
 			return ErrInvalidSignerCount
 		}
-		if pubhash, has := allowedKeyMap[loader.ChainCoord().ID()]; has {
-			if !signers[0].Equal(pubhash) {
-				return ErrNotAllowed
-			}
+		if !allowedKeyMap[signers[0]] {
+			return ErrNotAllowed
 		}
 
 		fromAcc, err := loader.Account(tx.From())
@@ -81,16 +78,15 @@ func init() {
 		}
 		ctx.AddSeq(tx.From())
 
-		chainCoord := ctx.ChainCoord()
-		fromBalance, err := ctx.AccountBalance(tx.From())
+		fromAcc, err := ctx.Account(tx.From())
 		if err != nil {
 			return nil, err
 		}
-		if err := fromBalance.SubBalance(chainCoord, Fee); err != nil {
+		if err := fromAcc.SubBalance(Fee); err != nil {
 			return nil, err
 		}
 
-		contAddr := common.NewAddress(coord, chainCoord, 0)
+		contAddr := common.NewAddress(coord, 0)
 		if is, err := ctx.IsExistAccount(contAddr); err != nil {
 			return nil, err
 		} else if is {
@@ -102,8 +98,7 @@ func init() {
 		}
 
 		statedb := &StateDB{
-			ChainCoord: chainCoord,
-			Context:    ctx,
+			Context: ctx,
 		}
 		logconfig := &vm.LogConfig{
 			DisableMemory: false,
@@ -244,8 +239,8 @@ func (tx *CreateContract) ReadFrom(r io.Reader) (int64, error) {
 func (tx *CreateContract) MarshalJSON() ([]byte, error) {
 	var buffer bytes.Buffer
 	buffer.WriteString(`{`)
-	buffer.WriteString(`"chain_coord":`)
-	if bs, err := tx.ChainCoord_.MarshalJSON(); err != nil {
+	buffer.WriteString(`"type":`)
+	if bs, err := json.Marshal(tx.Type_); err != nil {
 		return nil, err
 	} else {
 		buffer.Write(bs)
@@ -253,13 +248,6 @@ func (tx *CreateContract) MarshalJSON() ([]byte, error) {
 	buffer.WriteString(`,`)
 	buffer.WriteString(`"timestamp":`)
 	if bs, err := json.Marshal(tx.Timestamp_); err != nil {
-		return nil, err
-	} else {
-		buffer.Write(bs)
-	}
-	buffer.WriteString(`,`)
-	buffer.WriteString(`"type":`)
-	if bs, err := json.Marshal(tx.Type_); err != nil {
 		return nil, err
 	} else {
 		buffer.Write(bs)
