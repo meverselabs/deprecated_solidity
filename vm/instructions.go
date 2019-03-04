@@ -22,10 +22,10 @@ import (
 	"math/big"
 	"strings"
 
-	ecrypto "git.fleta.io/fleta/common/crypto"
-	"git.fleta.io/fleta/common/hash"
-	"git.fleta.io/fleta/core/amount"
-	"git.fleta.io/fleta/solidity/vm/math"
+	ecrypto "github.com/fletaio/common/crypto"
+	"github.com/fletaio/common/hash"
+	"github.com/fletaio/core/amount"
+	"github.com/fletaio/solidity/vm/math"
 )
 
 var (

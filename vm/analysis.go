@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"git.fleta.io/fleta/common/hash"
+	"github.com/fletaio/common/hash"
 )
 
 // destinations stores one map per contract (keyed by hash of code).

@@ -19,7 +19,7 @@ package vm
 import (
 	"crypto/sha256"
 
-	"git.fleta.io/fleta/common"
+	"github.com/fletaio/common"
 )
 
 // PrecompiledContract is the basic interface for native Go contracts. The implementation

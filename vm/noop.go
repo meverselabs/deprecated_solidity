@@ -17,9 +17,9 @@
 package vm
 
 import (
-	"git.fleta.io/fleta/common"
-	"git.fleta.io/fleta/common/hash"
-	"git.fleta.io/fleta/core/amount"
+	"github.com/fletaio/common"
+	"github.com/fletaio/common/hash"
+	"github.com/fletaio/core/amount"
 )
 
 func NoopCanTransfer(db StateDB, from common.Address, balance *amount.Amount) bool {

@@ -1,9 +1,9 @@
 package solidity
 
 import (
-	"git.fleta.io/fleta/common"
-	"git.fleta.io/fleta/core/amount"
-	"git.fleta.io/fleta/solidity/vm"
+	"github.com/fletaio/common"
+	"github.com/fletaio/core/amount"
+	"github.com/fletaio/solidity/vm"
 )
 
 // CanTransfer returns the transfer-able state of the address

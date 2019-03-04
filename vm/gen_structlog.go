@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"git.fleta.io/fleta/common/hash"
-	"git.fleta.io/fleta/solidity/vm/hexutil"
-	"git.fleta.io/fleta/solidity/vm/math"
+	"github.com/fletaio/common/hash"
+	"github.com/fletaio/solidity/vm/hexutil"
+	"github.com/fletaio/solidity/vm/math"
 )
 
 var _ = (*structLogMarshaling)(nil)

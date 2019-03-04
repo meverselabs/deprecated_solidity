@@ -3,8 +3,8 @@ package vm
 import (
 	"math/big"
 
-	"git.fleta.io/fleta/common"
-	"git.fleta.io/fleta/common/hash"
+	"github.com/fletaio/common"
+	"github.com/fletaio/common/hash"
 )
 
 // BytesToAddress get a address from the bytes

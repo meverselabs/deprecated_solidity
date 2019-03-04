@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"git.fleta.io/fleta/solidity/vm/math"
+	"github.com/fletaio/solidity/vm/math"
 )
 
 func memorySha3(stack *Stack) *big.Int {

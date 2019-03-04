@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"git.fleta.io/fleta/solidity/vm/math"
+	"github.com/fletaio/solidity/vm/math"
 )
 
 // Common comes from github.com/ethereum/go-ethereum/common/big.go

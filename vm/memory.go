@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"git.fleta.io/fleta/solidity/vm/math"
+	"github.com/fletaio/solidity/vm/math"
 )
 
 // Memory implements a simple memory model for the ethereum virtual machine.

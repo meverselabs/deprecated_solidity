@@ -8,13 +8,13 @@ import (
 	"math/big"
 	"time"
 
-	"git.fleta.io/fleta/common"
-	"git.fleta.io/fleta/common/hash"
-	"git.fleta.io/fleta/common/util"
-	"git.fleta.io/fleta/core/amount"
-	"git.fleta.io/fleta/core/data"
-	"git.fleta.io/fleta/core/transaction"
-	"git.fleta.io/fleta/solidity/vm"
+	"github.com/fletaio/common"
+	"github.com/fletaio/common/hash"
+	"github.com/fletaio/common/util"
+	"github.com/fletaio/core/amount"
+	"github.com/fletaio/core/data"
+	"github.com/fletaio/core/transaction"
+	"github.com/fletaio/solidity/vm"
 )
 
 func init() {

@@ -23,11 +23,11 @@ import (
 	"math/big"
 	"time"
 
-	"git.fleta.io/fleta/common"
-	"git.fleta.io/fleta/common/hash"
-	"git.fleta.io/fleta/core/amount"
-	"git.fleta.io/fleta/solidity/vm/hexutil"
-	"git.fleta.io/fleta/solidity/vm/math"
+	"github.com/fletaio/common"
+	"github.com/fletaio/common/hash"
+	"github.com/fletaio/core/amount"
+	"github.com/fletaio/solidity/vm/hexutil"
+	"github.com/fletaio/solidity/vm/math"
 )
 
 type Storage map[hash.Hash256]hash.Hash256

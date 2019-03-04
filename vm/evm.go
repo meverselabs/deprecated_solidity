@@ -22,9 +22,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"git.fleta.io/fleta/common"
-	"git.fleta.io/fleta/common/hash"
-	"git.fleta.io/fleta/core/amount"
+	"github.com/fletaio/common"
+	"github.com/fletaio/common/hash"
+	"github.com/fletaio/core/amount"
 )
 
 // emptyCodeHash is used by create to ensure deployment is disallowed to already
