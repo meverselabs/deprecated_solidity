@@ -2,7 +2,6 @@ package solidity
 
 import (
 	"encoding/binary"
-	"log"
 
 	"github.com/fletaio/common"
 	"github.com/fletaio/common/hash"
@@ -29,6 +28,7 @@ func init() {
 // StateDB is an EVM database for full state querying.
 type StateDB struct {
 	Context *data.Context
+	Coord   *common.Coordinate
 }
 
 // CreateAccount creates the sub account of the address to the context inside of EVM
@@ -199,5 +199,15 @@ func (sd *StateDB) Snapshot() int {
 
 // AddLog not implemented yet
 func (sd *StateDB) AddLog(l *vm.Log) {
-	log.Println("AddLog", l)
+	e, err := sd.Context.Eventer().NewByTypeName("solidity.Log")
+	if err != nil {
+		panic(err)
+	}
+	ev := e.(*LogEvent)
+	ev.Coord_ = sd.Coord
+	ev.Address = l.Address
+	ev.Topics = l.Topics
+	ev.Data = l.Data
+	ev.Removed = l.Removed
+	sd.Context.EmitEvent(e)
 }

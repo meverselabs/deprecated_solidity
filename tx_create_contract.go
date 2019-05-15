@@ -99,6 +99,7 @@ func init() {
 
 		statedb := &StateDB{
 			Context: ctx,
+			Coord:   coord,
 		}
 		logconfig := &vm.LogConfig{
 			DisableMemory: false,
